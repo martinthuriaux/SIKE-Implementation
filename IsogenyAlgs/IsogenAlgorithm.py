@@ -1,15 +1,15 @@
 # Isogen.py
 
-from PointGenerator import (
+from EllipticCurveArithmetic.PointGenerator import (
     find_P2_Q2,
     find_P3_Q3,
 )
 
-from FindingPointsInE import (
+from EllipticCurveArithmetic.FindingPointsInE import (
     negate_fp2,
 )
 
-from EllipticCurveArithmetic import (
+from EllipticCurveArithmetic.EllipticCurveArithmetic import (
     point_add_montgomery,
     scalar_mul_montgomery,
     point_sub_montgomery,
@@ -17,7 +17,7 @@ from EllipticCurveArithmetic import (
     xTPL_xonly
 )
 
-from ComputingIsogenies import (
+from .ComputingIsogenies import (
     compute_2_isogeny_xonly,
     compute_3_isogeny_xonly,
 )
@@ -51,10 +51,8 @@ def build_kernel_generator_from_secret(p, sk_l, P_l, Q_l, A):
     next kernel isogeny step needs a full point on the current curve.
     """
     kQ = scalar_mul_montgomery(Q_l, sk_l, p, A)
-    print(f"Value of {sk_l} * {Q_l}):", kQ)
 
     S_point = point_add_montgomery(P_l, kQ, p, A)
-    print(f"Value of {P_l} + {kQ}):", S_point)
     return S_point
 
 
@@ -72,7 +70,6 @@ def compute_public_key_isogeny(
 ):
     """
     SIKE keygen isogeny walk ("Compute a public key pk_ℓ").
-    Corrected version: uses [ℓ^(e_l-i-1)]S for kernel, updates xS via φ_x.
     """
 
     # --- (1) Build master secret point S_master = P + sk*Q ---
@@ -81,7 +78,6 @@ def compute_public_key_isogeny(
         raise RuntimeError("degenerate kernel: P + sk*Q = O")
 
     xS = S_master[0]  # only keep x, per spec
-    print("Initial xS:", xS)
 
     A_current = A_start
 
@@ -95,7 +91,6 @@ def compute_public_key_isogeny(
 
         # kernel x = x( [l^k] * S_i )
         xKer = repeated_xmul_power(xS, A_current, l, k, p)
-        print(f"Round {i}: xKer = {xKer}")
 
         # build isogeny from xKer
         if l == 2:
@@ -108,15 +103,11 @@ def compute_public_key_isogeny(
         x2_new = phi_x(x2)
         x3_new = phi_x(x3)
 
-        print(f"Value of A at round {i}", A_next)
-        print(f"In round {i}, f(x_1):", x1_new, "f(x_2):", x2_new, "f(x_3):", x3_new)
-
         if None in (x1_new, x2_new, x3_new):
             raise RuntimeError("basis point killed (shouldn't happen)")
 
         # move secret forward to next curve
         xS_new = phi_x(xS)
-        print(f"In round {i}, f(xS):", xS_new)
         if xS_new is None:
             if i != e_l - 1:
                 raise RuntimeError("secret died early")

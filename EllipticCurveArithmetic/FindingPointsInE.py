@@ -10,8 +10,6 @@ This module handles:
       E0 : y^2 = x^3 + 6x^2 + x
   over F_{p^2}
 
-This file does NOT implement point addition / scalar multiplication.
-Those live in EllipticCurveArithmetic.py.
 """
 
 # --------------------------
@@ -304,6 +302,5 @@ if __name__ == "__main__":
 
     print("6*8 ", mul_fp2((6,0),(8,0),11))
 
-    # Uncomment to see them all (576 points for p=23):
     # for P in ptsFp2:
     #    print(P)

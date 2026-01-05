@@ -1,4 +1,4 @@
-from FindingPointsInE import (
+from .FindingPointsInE import (
     add_fp2, sub_fp2, mul_fp2, sqr_fp2,
     eq_fp2, negate_fp2, inv_fp2, div_fp2,
 )
@@ -111,10 +111,8 @@ def point_add_montgomery(P, Q, p, A, B=None):
 def xDBL_xonly(xP, A, p):
     # returns x_[2]P on curve y^2 = x^3 + A x^2 + x
     xP2 = sqr_fp2(xP, p)                        # xP^2
-    xP4 = sqr_fp2(xP2, p)                       # xP^4
-
+    
     one  = (1 % p, 0)
-    two  = (2 % p, 0)
     four = (4 % p, 0)
 
     num_part = sub_fp2(xP2, one, p)             # xP^2 - 1

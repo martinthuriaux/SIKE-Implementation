@@ -16,7 +16,7 @@ Exports:
     cfpk(xP, xQ, xR, p)              -> A_from_pk
 """
 
-from FindingPointsInE import (
+from EllipticCurveArithmetic.FindingPointsInE import (
     add_fp2,
     sub_fp2,
     mul_fp2,
@@ -190,6 +190,7 @@ def cfpk(xP, xQ, xR, p):
 
     den_part = mul_many_fp2([xP, xQ, xR], p)         # xP*xQ*xR
     den      = mul_fp2(four, den_part, p)            # 4*xP*xQ*xR
+
     den_inv  = inv_fp2(den, p)
 
     frac     = mul_fp2(num, den_inv, p)              # num/den

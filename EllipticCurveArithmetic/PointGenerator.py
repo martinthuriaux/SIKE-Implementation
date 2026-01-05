@@ -7,19 +7,19 @@ for the SIKE base curve
 
     E0 : y^2 = x^3 + 6x^2 + x   over F_{p^2} = F_p(i), i^2 = -1 (mod p),
 
-following the procedure described in the SIKE spec (NIST submission, §1.3.3).
+following the procedure described in the SIKE spec.
 
 Dependencies:
 - FindingPointsInE.py   (finite field ops, sqrt helpers, curve_rhs_fp2)
 - EllipticCurveArithmetic.py (point addition, scalar multiply)
 """
 
-from FindingPointsInE import (
+from .FindingPointsInE import (
     add_fp2, sub_fp2, mul_fp2, sqr_fp2, eq_fp2, negate_fp2,
     sqrt_fp2_all, is_square_fp, sqrt_fp_all,
     curve_rhs_fp2, inv_fp2
 )
-from EllipticCurveArithmetic import (
+from .EllipticCurveArithmetic import (
     curve_rhs_montgomery,
     scalar_mul_montgomery,
 )
@@ -71,8 +71,6 @@ def point_has_exact_order_power(P, base, exponent, p, A):
       [base^exponent]P = O
     and if exponent > 0,
       [base^(exponent-1)]P != O.
-
-    We ONLY need base=3 here (for P3,Q3), but we write it generally.
     """
     if P is None:
         return False
@@ -125,7 +123,7 @@ def find_P2_Q2(p, A):
             break
 
         x   = (c % p, 1)                           # x = i + c
-        rhs = curve_rhs_fp2(x, p, A)         # <-- USE A HERE
+        rhs = curve_rhs_fp2(x, p, A)       
         for y in sqrt_fp2_all(rhs, p):
             cand = scalar_mul_montgomery((x, y), cof3, p, A)
             if cand is None:
@@ -230,7 +228,7 @@ def find_P3_Q3(p, A):
 
 
 # ----------------------------------------------------------
-# 3. Top-level convenience
+# 3. Higher-level wrapper
 # ----------------------------------------------------------
 
 def generate_public_basis_points(p, A):

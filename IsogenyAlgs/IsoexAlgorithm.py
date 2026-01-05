@@ -5,7 +5,7 @@
 # (which determines j), instead of hashing j into bytes.
 from secrets import randbelow
 
-from FindingPointsInE import (
+from EllipticCurveArithmetic.FindingPointsInE import (
     add_fp2,
     mul_fp2,
     sqrt_fp2_all,
@@ -14,14 +14,14 @@ from FindingPointsInE import (
     inv_fp2,
     eq_fp2
 )
-from EllipticCurveArithmetic import (
+from EllipticCurveArithmetic.EllipticCurveArithmetic import (
     scalar_mul_montgomery,
     point_add_montgomery,
     point_sub_montgomery,
     xDBL_xonly,
     xTPL_xonly,
 )
-from ComputingIsogenies import (
+from .ComputingIsogenies import (
     cfpk,                       # curve-from-public-key: A_from_pk = cfpk(xP,xQ,xR)
     compute_2_isogeny_xonly,
     compute_3_isogeny_xonly,
@@ -54,13 +54,6 @@ def j_invariant_from_A(A, p):
     j = mul_fp2(num, inv_fp2(den, p), p)
     return j
 
-def build_kernel_generator_from_secret(sk_l, P_l, Q_l, p):
-    """
-    S_master = P_l + [sk_l] Q_l  as a full affine point (x,y).
-    """
-    kQ = scalar_mul_montgomery(Q_l, sk_l, p)
-    S_point = point_add_montgomery(P_l, kQ, p)
-    return S_point
 
 def repeated_xmul_power(xS, A_current, e_l, k, p):
     """
@@ -131,6 +124,7 @@ def isoex_l(
 
     P_other, Q_other = lift_basis_from_pk(xP_m, xQ_m, xR_m, A_current, p) 
     kQ = scalar_mul_montgomery(Q_other, sk_l, p, A_current)
+    
     S_master = point_add_montgomery(P_other, kQ, p, A_current)
 
     if S_master is None:
@@ -139,6 +133,7 @@ def isoex_l(
 
     # 3. Walk the isogeny e_l times.
     for i in range(e_l):
+
         k = e_l - i - 1  # how much torsion remains this round
 
         # kernel x-coordinate for this step:
@@ -194,9 +189,7 @@ if __name__ == "__main__":
 
     # toy secrets
     sk2 = randbelow(pow(2, e2))
-    print("sk2:", sk2)
     sk3 = randbelow(pow(3, e3))
-    print("sk3:", sk3)
 
     # Build Alice's pk_2 (2-side public key): she pushes Bob's 3-torsion x-basis
     xP3, xQ3, xR3 = P3[0], Q3[0], R3[0]
@@ -230,8 +223,6 @@ if __name__ == "__main__":
         xR_m = xR2,
     )
 
-    print("[+] Alice's public key (pk2):", pk2)
-    print("[+] Bob's public key   (pk3):", pk3)
 
     # Alice computes shared secret using her 2-side secret and Bob's pk3
     A_alice = isoex_l(
@@ -253,6 +244,3 @@ if __name__ == "__main__":
 
     j_alice = j_invariant_from_A(A_alice, p)
     j_bob = j_invariant_from_A(A_bob, p)
-
-    print("j_alice =", j_alice)
-    print("j_bob   =", j_bob)

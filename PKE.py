@@ -8,10 +8,10 @@ from math import ceil
 from typing import Optional
 
 
-from PointGenerator import find_P2_Q2, find_P3_Q3
-from EllipticCurveArithmetic import point_sub_montgomery
-from isogen import compute_public_key_isogeny
-from isoex import isoex_l, j_invariant_from_A
+from EllipticCurveArithmetic.PointGenerator import find_P2_Q2, find_P3_Q3
+from EllipticCurveArithmetic.EllipticCurveArithmetic import point_sub_montgomery
+from IsogenyAlgs.IsogenAlgorithm import compute_public_key_isogeny
+from IsogenyAlgs.IsoexAlgorithm import isoex_l, j_invariant_from_A
 
 
 # ---------- small helpers ----------
@@ -38,7 +38,8 @@ def hash_j_to_bytes(j, p: int, outlen: int) -> bytes:
     a, b = j
     bytelen = ceil(p.bit_length() / 8)
     enc = int_to_be(a % p, bytelen) + int_to_be(b % p, bytelen)
-    return shake256_bytes(enc, outlen)
+    output = shake256_bytes(enc, outlen)
+    return output
 
 
 # ---------- parameters container ----------
@@ -55,7 +56,6 @@ class SIKEParams:
         P3, Q3 = find_P3_Q3(self.p, self.A0)
         R2 = point_sub_montgomery(P2, Q2, self.p, self.A0)
         R3 = point_sub_montgomery(P3, Q3, self.p, self.A0)
-        print("P2:", P2, "Q2:", Q2, "R2:", R2, "P3:", P3, "Q3:", Q3, "R3:", R3)
         return (P2, Q2, R2), (P3, Q3, R3)
 
 
@@ -72,9 +72,6 @@ def Gen(params: SIKEParams):
 
     # 1) sk_3 <–– Random in K_3 = [0, 3^e3)
     sk3 = randbelow(pow(3, params.e3))
-    print("Value of sk3 in Gen:", sk3)
-
-    # print("For gen: Value of x_(p_m) :", xP2, "Value of x_(q_m):", xQ2, "Value of x_(r_m):", xR2)
 
     # 2) pk3 <–– isogen_3(sk_3)
     pk3 = compute_public_key_isogeny(
@@ -143,9 +140,6 @@ def Dec(params: SIKEParams, sk3, ciphertext) -> bytes:
     """
     c0, c1 = ciphertext
 
-    # shared secret via isoex_3 with Alice's c0 (= pk2)
-    print("p in Dec:", params.p)
-
     # 10) J <–– isoex_3(c0, sk_3)
     A_shared = isoex_l(
         p      = params.p,
@@ -170,16 +164,16 @@ def Dec(params: SIKEParams, sk3, ciphertext) -> bytes:
 
 if __name__ == "__main__":
     
-    p = 71
+    p = 647
     A0 = (6 % p, 0)
-    e2, e3 = 3, 2
+    e2, e3 = 3, 4
     params = SIKEParams(p=p, A0=A0, e2=e2, e3=e3)
 
     # Bob generates (pk3, sk3)
     pk3, sk3 = Gen(params)
 
     # Alice encrypts
-    msg = b"Here is symmetric key data"
+    msg = b"SIKE Algorithm"
     print("Message before encryption:", msg)
     c0, c1 = Enc(params, pk3, msg)
     print("Ciphertext post encryption:", (c0, c1))
