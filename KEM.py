@@ -1,5 +1,12 @@
-# KEM.py
-# SIKE Algorithm 2 (KeyGen, Encaps, Decaps) built on PKE.
+'''
+KEM.py
+======
+This module implements the KEM algorithm described in the official NIST paper describing SIKE.
+
+Dependencies:
+- PKE.py for the underlying public-key encryption scheme (Algorithm 1 in the paper)
+- IsogenAlgorithm.py for computing the isogenies needed in encryption and decryption
+'''
 
 from secrets import token_bytes, randbelow
 from hashlib import shake_256
@@ -89,8 +96,8 @@ def Encaps(params: SIKEParams, pk3: Pk2):
     # 6) r <–– G(m || pk3)
     r = _G(m + _ser_pk(pk3, params.p), params.e2)
 
-    print("ENC m =", m.hex())
-    print("ENC r =", r)
+    print("Value of m during ENCRYPTION: ", m.hex())
+    print("Value of r during ENCRYPTION: ", r)
 
     # 7) (c0, c1) <–– Enc(pk3, m, r)
     c0, c1 = Enc(params, pk3, m, r) 
@@ -111,8 +118,8 @@ def Decaps(params: SIKEParams, s: bytes, sk3: int, pk3: Pk2, ciphertext):
     # 11) r' <–– G(m' || pk3)
     r_prime = _G(m_prime + _ser_pk(pk3, params.p), params.e2)
 
-    print("DEC m' =", m_prime.hex() if isinstance(m_prime, (bytes, bytearray)) else m_prime)
-    print("DEC r' =", r_prime)
+    print("Value of m' during DECRYPTION: ", m_prime.hex() if isinstance(m_prime, (bytes, bytearray)) else m_prime)
+    print("Value of r' during DECRYPTION: ", r_prime)
 
     # 12) c0' = isogen2(r')
     (P2, Q2, _), (P3, Q3, R3) = params.bases()
@@ -139,7 +146,6 @@ def Decaps(params: SIKEParams, s: bytes, sk3: int, pk3: Pk2, ciphertext):
     else:
         # 16) K <–– H(s || (c0, c1))
         K = _H(s + ct_bytes)         # fallback per Algorithm 2
-        print("ERRRRR0OOOOOOOR")
     # 17) return K
     return K
 

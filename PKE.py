@@ -1,6 +1,18 @@
-# sike_pke.py
-#
-# A direct implementation of Algorithm 1 (PKE = Gen, Enc, Dec)
+'''
+PKE.py
+======
+
+This module implements the PKE algorithm described in the official NIST paper describing SIKE. This 
+module implements a lot of helper methods which are used both in PKE and KEM, such as F() and H() 
+functions described in the paper, as well as some basic byte manipulation and hashing utilities. 
+
+Dependencies:
+- PointGenerator for finding torsion basis points on the starting curve
+- EllipticCurveArithmetic for point operations and x-only arithmetic
+- IsogenAlgorithm for computing the isogen functioned needed in encryption and decryption 
+- IsoexAlgorithm for computing the isoex_l function used in encryption and decryption
+- Some public libraries (dataclasses, secrets, math, and typing)
+'''
 
 from dataclasses import dataclass
 from secrets import randbelow
@@ -173,7 +185,7 @@ if __name__ == "__main__":
     pk3, sk3 = Gen(params)
 
     # Alice encrypts
-    msg = b"SIKE Algorithm"
+    msg = b"Hello, SIKE!"
     print("Message before encryption:", msg)
     c0, c1 = Enc(params, pk3, msg)
     print("Ciphertext post encryption:", (c0, c1))

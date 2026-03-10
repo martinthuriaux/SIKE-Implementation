@@ -11,7 +11,7 @@ following the procedure described in the SIKE spec.
 
 Dependencies:
 - FindingPointsInE.py   (finite field ops, sqrt helpers, curve_rhs_fp2)
-- EllipticCurveArithmetic.py (point addition, scalar multiply)
+- EllipticCurveArithmetic.py (scalar multiply)
 """
 
 from .FindingPointsInE import (
@@ -20,7 +20,6 @@ from .FindingPointsInE import (
     curve_rhs_fp2, inv_fp2
 )
 from .EllipticCurveArithmetic import (
-    curve_rhs_montgomery,
     scalar_mul_montgomery,
 )
 
@@ -80,7 +79,7 @@ def point_has_exact_order_power(P, base, exponent, p, A):
 
     Pfull = scalar_mul_montgomery(P, full_pow, p, A)
     if Pfull is not None:
-        return False  # didn't vanish at expected full order
+        return False  
 
     if exponent == 0:
         # order 1 == infinity
@@ -92,17 +91,33 @@ def point_has_exact_order_power(P, base, exponent, p, A):
 def two_torsion_x_roots(A, p):
     """Return the three 2-torsion x-roots: 0 and (-A ± sqrt(A^2-4))/2."""
     zero = (0, 0)
+
     A2   = sqr_fp2(A, p)
+    
     four = (4 % p, 0)
+    
+    # Discriminant of the 2-torsion polynomial: A^2 - 4
     disc = sub_fp2(A2, four, p)                  # A^2 - 4
+    
+    # Compute all square roots of the discriminant in F_{p^2}
     roots_disc = sqrt_fp2_all(disc, p)
+    
     if not roots_disc:
         raise RuntimeError("No sqrt(A^2-4) in F_{p^2} (shouldn't happen here).")
-    s = roots_disc[0]                             # either sign is fine; ± handled below
+    
+    # either sign is fine; ± handled below
+    s = roots_disc[0]                             
+    
     negA   = negate_fp2(A, p)
+    
+    # Compute 1/2 in F_{p^2}
     two_inv = inv_fp2((2 % p, 0), p)
-    r1 = mul_fp2(add_fp2(negA, s, p), two_inv, p)   # (-A + s)/2
-    r2 = mul_fp2(sub_fp2(negA, s, p), two_inv, p)   # (-A - s)/2
+    
+    # Quadratic-formula roots:
+    #   (-A + s)/2  and  (-A - s)/2
+    r1 = mul_fp2(add_fp2(negA, s, p), two_inv, p)   
+    r2 = mul_fp2(sub_fp2(negA, s, p), two_inv, p)   
+    
     return zero, r1, r2
 
 # ----------------------------------------------------------
@@ -119,11 +134,16 @@ def find_P2_Q2(p, A):
 
     P2 = Q2 = None
     for c in range(p):
+         # Stop early once both basis points are found
         if P2 is not None and Q2 is not None:
             break
 
-        x   = (c % p, 1)                           # x = i + c
+        x   = (c % p, 1)                           # x = i + c ∈ F_{p^2}
+        
+        # Compute the right-hand side of the curve equation at x
         rhs = curve_rhs_fp2(x, p, A)       
+        
+        # For each square root y of rhs, (x, y) is a point on the curve
         for y in sqrt_fp2_all(rhs, p):
             cand = scalar_mul_montgomery((x, y), cof3, p, A)
             if cand is None:
@@ -163,15 +183,13 @@ def find_P3_Q3(p, A):
              - we choose the sqrt in F_{p^2} \ F_p
              - and Q3 has exact order 3^{e3}.
 
-    Note: x = (c,0) is "just c" in F_p ⊂ F_{p^2}.
     """
 
     e2, e3 = get_sike_exponents(p)
     cofactor_2e2m1 = 2 ** (e2 - 1)   # multiply to wipe 2-part
     zero = (0, 0)
 
-    P3 = None
-    Q3 = None
+    P3 = Q3 =  None
 
     for c in range(p):
         if P3 is not None and Q3 is not None:

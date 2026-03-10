@@ -10,12 +10,9 @@ Curve model we maintain everywhere:
 
 All F_{p^2} elements are tuples (a0, a1) meaning a0 + a1*i (mod p).
 
-Exports:
-    compute_2_isogeny_xonly(A, K, p) -> (A_next, phi2_x)
-    compute_3_isogeny_xonly(A, K, p) -> (A_next, phi3_x)
-    cfpk(xP, xQ, xR, p)              -> A_from_pk
+Dependencies:
+- FindingPointsInE.py for basic F_{p^2} field operations (add, sub, mul, sqr, inv, eq).
 """
-
 from EllipticCurveArithmetic.FindingPointsInE import (
     add_fp2,
     sub_fp2,
@@ -206,9 +203,9 @@ def cfpk(xP, xQ, xR, p):
 # =====================================================================
 
 if __name__ == "__main__":
-    from PointGenerator import find_P2_Q2, find_P3_Q3
+    from EllipticCurveArithmetic.PointGenerator import find_P2_Q2, find_P3_Q3
     from EllipticCurveArithmetic import point_add_montgomery
-    from FindingPointsInE import negate_fp2
+    from EllipticCurveArithmetic.FindingPointsInE import negate_fp2
 
     p = 23
     A0 = (6 % p, 0)   # base curve y^2 = x^3 + 6x^2 + x, i.e. A = (6,0)

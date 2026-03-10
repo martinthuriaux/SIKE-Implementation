@@ -1,10 +1,18 @@
-# isoex.py
-#
-# Implements SIKE §1.3.7 "Establishing shared keys: isoex_ell"
-# For now we just return the final A coefficient of the shared curve
-# (which determines j), instead of hashing j into bytes.
-from secrets import randbelow
+'''
+IsoexAlgorithm.py
+=================
 
+This module implements the isoex_l algorithm, which is the core of the SIKE key exchange.
+
+Dependencies:
+- FindingPointsInE.py for finite field arithmetic and sqrt helpers
+- EllipticCurveArithmetic.py for point operations and x-only arithmetic
+- ComputingIsogenies.py for building isogenies from kernel points
+- secrets.randbelow for generating random secrets in the demo
+'''
+
+
+from secrets import randbelow
 from EllipticCurveArithmetic.FindingPointsInE import (
     add_fp2,
     mul_fp2,
@@ -22,7 +30,7 @@ from EllipticCurveArithmetic.EllipticCurveArithmetic import (
     xTPL_xonly,
 )
 from .ComputingIsogenies import (
-    cfpk,                       # curve-from-public-key: A_from_pk = cfpk(xP,xQ,xR)
+    cfpk,                       
     compute_2_isogeny_xonly,
     compute_3_isogeny_xonly,
 )

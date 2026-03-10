@@ -17,7 +17,9 @@ This module handles:
 # --------------------------
 
 def modp(x, p):
-    """Reduce integer x modulo p."""
+    """
+    Reduce integer x modulo p.
+    """
     return x % p
 
 
@@ -47,8 +49,10 @@ def mul_fp2(a, b, p):
     """
     (a0, a1) = a
     (b0, b1) = b
+    
     real = (a0*b0 - a1*b1) % p
     imag = (a0*b1 + a1*b0) % p
+
     return (real, imag)
 
 
@@ -68,11 +72,13 @@ def pow_fp2(a, e, p):
     result = (1 % p, 0)  # multiplicative identity in F_{p^2}
     base = a
     ee = e
+    
     while ee > 0:
         if ee & 1:
             result = mul_fp2(result, base, p)
         base = mul_fp2(base, base, p)
         ee >>= 1
+    
     return result
 
 
@@ -99,10 +105,11 @@ def inv_fp2(a, p):
     """
     a0, a1 = a
     denom = (a0*a0 + a1*a1) % p
+
     # denom is in F_p, so invert it mod p:
     denom_inv = pow(denom, -1, p)
-    return ((a0 * denom_inv) % p,
-            ((-a1) * denom_inv) % p)
+
+    return ((a0 * denom_inv) % p, ((-a1) * denom_inv) % p)
 
 
 def div_fp2(a, b, p):
@@ -146,8 +153,10 @@ def is_square_fp(a, p):
     Uses Euler's criterion: a^((p-1)/2) == 1 mod p OR a == 0.
     """
     a = a % p
+
     if a == 0:
         return True
+    
     return pow(a, (p - 1) // 2, p) == 1
 
 
@@ -158,9 +167,11 @@ def sqrt_fp_all(a, p):
     """
     a = a % p
     sols = []
+
     for y in range(p):
         if (y*y) % p == a:
             sols.append(y % p)
+
     return sols
 
 
@@ -176,17 +187,20 @@ def sqrt_fp2_all(z, p):
     """
     sols = []
     (z0, z1) = z
+
     for c in range(p):
         for d in range(p):
             y = (c, d)
             y2 = sqr_fp2(y, p)
             if y2[0] == z0 and y2[1] == z1:
                 sols.append(y)
-    # de-duplicate +/-y (not strictly necessary, but nice)
+    
+    # de-duplicate +/-y (not strictly necessary but good measure)
     uniq = []
     for y in sols:
         if not any(eq_fp2(y, u) for u in uniq):
             uniq.append(y)
+    
     return uniq
 
 
@@ -237,7 +251,7 @@ def is_curve_supersingular(p):
 
     Returns (is_ss, numFp, trace_t)
     """
-    numFp, _pts = count_points_over_fp(p)
+    numFp = count_points_over_fp(p)
     t = (p + 1) - numFp
     return (t % p == 0), numFp, t
 

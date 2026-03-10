@@ -1,3 +1,24 @@
+'''
+This module implements arithmetic on Montgomery curves over F_{p^2}.
+In particular, it provides:
+
+- Evaluation of the Montgomery curve equation
+      E_A : y^2 = x^3 + A x^2 + x
+
+- Affine point operations on Montgomery curves:
+      * Point addition
+      * Point doubling
+      * Point subtraction
+
+- Scalar multiplication using the double-and-add method.
+
+- x-only arithmetic used in isogeny-based cryptography:
+      * x-coordinate doubling (xDBL)
+      * x-coordinate tripling (xTPL)
+
+Dependencies:
+- FindingPointsInE.py for basic F_{p^2} field operations (add, sub, mul, sqr, inv, eq, negate).
+'''
 from .FindingPointsInE import (
     add_fp2, sub_fp2, mul_fp2, sqr_fp2,
     eq_fp2, negate_fp2, inv_fp2, div_fp2,
@@ -69,7 +90,7 @@ def point_double_montgomery(P, p, A):
     return (x2P, y2P)
 
 
-# ---- Addition with doubling fallback (B = 1) ----
+# Addition of two full points on the Montgomery curve E_A : y^2 = x^3 + A x^2 + x (B = 1).
 def point_add_montgomery(P, Q, p, A, B=None):
     """
     Affine addition on y^2 = x^3 + A x^2 + x (B = 1).
@@ -79,6 +100,7 @@ def point_add_montgomery(P, Q, p, A, B=None):
     - If P = Q: uses the closed-form doubling above.
     - Else: generic chord-slope formula.
     """
+    # Appropriate error-checking
     if P is None:
         return Q
     if Q is None:
@@ -107,7 +129,7 @@ def point_add_montgomery(P, Q, p, A, B=None):
 
     return (x3, y3)
 
-
+# Returns the double of a given x-coordinate on the Montgomery curve, without needing the y-coordinate.
 def xDBL_xonly(xP, A, p):
     # returns x_[2]P on curve y^2 = x^3 + A x^2 + x
     xP2 = sqr_fp2(xP, p)                        # xP^2
@@ -129,7 +151,7 @@ def xDBL_xonly(xP, A, p):
     x2P = mul_fp2(num_sq, denom_inv, p)
     return x2P
 
-
+# Returns the triple of a given x-coordinate on the Montgomery curve, without needing the y-coordinate.
 def xTPL_xonly(xP, A, p):
     # returns x_[3]P on curve y^2 = x^3 + A x^2 + x
     xP2 = sqr_fp2(xP, p)                        # xP^2
@@ -178,15 +200,6 @@ def scalar_mul_montgomery(P, k, p, A, B=None):
 
     using double-and-add in affine coordinates.
 
-    Args:
-        P: (x,y) in F_{p^2}^2 or None (infinity)
-        k: nonnegative integer
-        p: base prime
-        A: F_{p^2} element (a0, a1) for the curve coefficient
-        B: F_{p^2} element for B (default (1,0))
-
-    Returns:
-        [k]P in affine coordinates, or None for infinity.
     """
     if B is None:
         B = (1 % p, 0)
@@ -212,20 +225,14 @@ def point_sub_montgomery(P, Q, p, A, B=None):
 
     using the generalized point_add_montgomery.
 
-    Args:
-        P, Q: points (x,y) in F_{p^2}^2 or None
-        p: base prime
-        A: F_{p^2} curve coefficient
-        B: F_{p^2} (default (1,0))
-
-    Returns:
-        P - Q in affine coordinates, or None for infinity.
     """
+    # Error-checking
     if B is None:
         B = (1 % p, 0)
-
+    
     if Q is None:
         return P
+    
     if P is None:
         (xQ, yQ) = Q
         # Return -Q

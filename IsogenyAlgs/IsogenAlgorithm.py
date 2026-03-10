@@ -1,12 +1,16 @@
-# Isogen.py
+'''
+IsogenAlgorithm.py
+==================
+This module implements the isogeny generation algorithm used in SIKE key generation,
 
+Dependencies:
+- PointGenerator for finding torsion basis points on the starting curve
+- EllipticCurveArithmetic for point operations and x-only arithmetic
+- ComputingIsogenies for building isogenies from kernel points
+'''
 from EllipticCurveArithmetic.PointGenerator import (
     find_P2_Q2,
     find_P3_Q3,
-)
-
-from EllipticCurveArithmetic.FindingPointsInE import (
-    negate_fp2,
 )
 
 from EllipticCurveArithmetic.EllipticCurveArithmetic import (
@@ -23,6 +27,9 @@ from .ComputingIsogenies import (
 )
 
 def fp2_const(n, p):
+    '''
+    Ensures that the constant n is represented as an F_{p^2} element (n mod p, 0).
+    '''
     return (n % p, 0)
 
 def repeated_xmul_power(xS, A_current, l, k, p):
