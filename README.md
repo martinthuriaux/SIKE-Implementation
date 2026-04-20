@@ -6,8 +6,8 @@ This repository contains the implementation developed for my undergraduate disse
 
 This project implements both the **Public Key Encryption (PKE)** and **Key Encapsulation Mechanism (KEM)** variants of SIKE, following the algorithms described in the NIST specification.
 
-- The **PKE scheme** (Algorithm 1) is implemented in `PKE.py` :contentReference[oaicite:0]{index=0}  
-- The **KEM scheme** (Algorithm 2) is implemented in `KEM.py` :contentReference[oaicite:1]{index=1}  
+- The **PKE scheme** (Algorithm 1) is implemented in `PKE.py`
+- The **KEM scheme** (Algorithm 2) is implemented in `KEM.py`
 
 The implementation aims to closely reflect the structure of the original protocol while remaining readable and suitable for experimentation.
 
